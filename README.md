@@ -35,6 +35,7 @@
 ## Tech Stack
 
 - **Backend:**
+
   - Flask 3.0.2
   - SQLAlchemy 2.0+
   - Python 3.13+
@@ -47,6 +48,7 @@
   - VS Code (recommended IDE)
 
 ## Project Structure
+
 ```
 /
 ├── src/
@@ -66,11 +68,13 @@
 ## Setup & Installation
 
 1. Enter the virtual environment:
+
    ```sh
    pipenv shell
    ```
 
 2. Install dependencies:
+
    ```sh
    pipenv install
    ```
@@ -83,6 +87,7 @@
 ## Database Models
 
 The project includes five main models that follow the format:
+
 ```
 TableName
 -
@@ -90,6 +95,7 @@ column_name data_type constraints
 ```
 
 1. **User Model**
+
    ```python
    class User(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
@@ -103,6 +109,7 @@ column_name data_type constraints
    ```
 
 2. **Post Model**
+
    ```python
    class Post(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
@@ -113,6 +120,7 @@ column_name data_type constraints
    ```
 
 3. **Comment Model**
+
    ```python
    class Comment(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
@@ -123,6 +131,7 @@ column_name data_type constraints
    ```
 
 4. **Like Model**
+
    ```python
    class Like(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
@@ -145,6 +154,7 @@ column_name data_type constraints
 You can generate the database diagram in two ways:
 
 1. Using the pipenv command:
+
    ```sh
    pipenv run diagram
    ```
@@ -159,6 +169,7 @@ Both commands will generate a `diagram.txt` file in the root directory with the 
 ## Development
 
 This project demonstrates:
+
 - Database modeling with SQLAlchemy
 - Entity relationships and foreign keys
 - Database diagram generation
@@ -173,7 +184,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Dante Fasano** - [GitHub](https://github.com/dantefasano)
 
-Project Link: [https://github.com/dantefasano/instagram-database-model](https://github.com/dantefasano/instagram-database-model)
+Project Link: [https://github.com/dantefasano/instagram-db-model](https://github.com/dantefasano/instagram-db-model)
 
 ---
 
