@@ -8,3 +8,17 @@ dist/*
 package.json
 !.vscode
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+build/
+develop-eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+coverage/
+htmlcov/
+.tox/
+.pytest_cache/

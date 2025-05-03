@@ -1,76 +1,180 @@
-<a href="https://www.breatheco.de"><img height="280" align="right" src="https://github.com/4GeeksAcademy/flask-rest-hello/blob/main/docs/assets/badge.png?raw=true"></a>
+# Instagram Database Model
 
-# Flask Boilerplate for Junior Developers
+> A SQLAlchemy-based database model for an Instagram-like application, featuring user management, posts, comments, likes, and following relationships. This project demonstrates database modeling and relationships using SQLAlchemy.
 
-Create flask API's in minutes, [📹 watch the video tutorial](https://youtu.be/ORxQ-K3BzQA).
+[![Flask](https://img.shields.io/badge/Flask-3.0.2-green.svg)](https://flask.palletsprojects.com/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-blue.svg)](https://www.sqlalchemy.org/)
+[![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-- [Extensive documentation here](https://start.4geeksacademy.com).
-- Integrated with Pipenv for package managing.
-- Fast deloyment to render.com or heroku with `$ pipenv run deploy`.
-- Use of `.env` file.
-- SQLAlchemy integration for database abstraction.
+**Keywords:** Flask, SQLAlchemy, Database Modeling, Instagram Clone, Python, Backend Development
 
-## 1) Installation
+## Table of Contents
 
-This template installs itself in a few seconds if you open it for free with Codespaces (recommended) or Gitpod.
-Skip this installation steps and jump to step 2 if you decide to use any of those services.
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Setup & Installation](#setup--installation)
+- [Database Models](#database-models)
+- [Generating the Database Diagram](#generating-the-database-diagram)
+- [Development](#development)
+- [License](#license)
+- [Contact](#contact)
 
-> Important: The boiplerplate is made for python 3.10 but you can change the `python_version` on the Pipfile.
+## Features
 
-The following steps are automatically runned withing gitpod, if you are doing a local installation you have to do them manually:
+- Complete Instagram-like database model
+- User management with profiles
+- Post creation and management
+- Comment system
+- Like functionality
+- Following relationships
+- Automatic diagram generation
+- Clean and maintainable codebase
 
-```sh
-pipenv install;
-psql -U root -c 'CREATE DATABASE example;'
-pipenv run init;
-pipenv run migrate;
-pipenv run upgrade;
+## Tech Stack
+
+- **Backend:**
+  - Flask 3.0.2
+  - SQLAlchemy 2.0+
+  - Python 3.13+
+
+- **Development Tools:**
+  - pipenv for package management
+  - Graphviz for diagram generation
+  - SQLite for database
+  - Git for version control
+  - VS Code (recommended IDE)
+
+## Project Structure
+```
+/
+├── src/
+│   ├── models.py        # Database models and diagram generation
+│   ├── main.py         # API endpoints
+│   ├── utils.py        # Utility functions
+│   └── admin.py        # Admin panel configuration
+├── scripts/
+│   ├── init_db.py      # Database initialization
+│   └── generate_diagram.py # Diagram generation script
+├── instance/
+│   └── database.db     # SQLite database file
+├── Pipfile            # Project dependencies
+└── README.md         # Project documentation
 ```
 
-> Note: Codespaces users can connect to psql by typing: `psql -h localhost -U gitpod example`
+## Setup & Installation
 
-## 2) How to Start coding
+1. Enter the virtual environment:
+   ```sh
+   pipenv shell
+   ```
 
-There is an example API working with an example database. All your application code should be written inside the `./src/` folder.
+2. Install dependencies:
+   ```sh
+   pipenv install
+   ```
 
-- src/main.py (it's where your endpoints should be coded)
-- src/models.py (your database tables and serialization logic)
-- src/utils.py (some reusable classes and functions)
-- src/admin.py (add your models to the admin and manage your data easily)
+3. Initialize the database:
+   ```sh
+   python scripts/init_db.py
+   ```
 
-For a more detailed explanation, look for the tutorial inside the `docs` folder.
+## Database Models
 
-## Remember to migrate every time you change your models
-
-You have to migrate and upgrade the migrations for every update you make to your models:
-
-```bash
-$ pipenv run migrate # (to make the migrations)
-$ pipenv run upgrade  # (to update your databse with the migrations)
+The project includes five main models that follow the format:
+```
+TableName
+-
+column_name data_type constraints
 ```
 
-## Generate a database diagram
+1. **User Model**
+   ```python
+   class User(db.Model):
+       id: Mapped[int] = mapped_column(primary_key=True)
+       username: Mapped[str] = mapped_column(String(80), unique=True)
+       email: Mapped[str] = mapped_column(String(120), unique=True)
+       password: Mapped[str] = mapped_column(nullable=False)
+       profile_picture: Mapped[str] = mapped_column(String(255))
+       bio: Mapped[str] = mapped_column(Text)
+       is_active: Mapped[bool] = mapped_column(Boolean())
+       created_at: Mapped[datetime] = mapped_column(DateTime)
+   ```
 
-If you want to visualize the structure of your database in the form of a diagram, you can generate it with the following command:
+2. **Post Model**
+   ```python
+   class Post(db.Model):
+       id: Mapped[int] = mapped_column(primary_key=True)
+       user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       image_url: Mapped[str] = mapped_column(String(255))
+       caption: Mapped[str] = mapped_column(Text)
+       created_at: Mapped[datetime] = mapped_column(DateTime)
+   ```
 
-```bash
-$ pipenv run diagram
-```
+3. **Comment Model**
+   ```python
+   class Comment(db.Model):
+       id: Mapped[int] = mapped_column(primary_key=True)
+       user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
+       content: Mapped[str] = mapped_column(Text)
+       created_at: Mapped[datetime] = mapped_column(DateTime)
+   ```
 
-This command will generate a file with the database diagram based on the models defined in `src/models.py`.
+4. **Like Model**
+   ```python
+   class Like(db.Model):
+       id: Mapped[int] = mapped_column(primary_key=True)
+       user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
+       created_at: Mapped[datetime] = mapped_column(DateTime)
+   ```
 
-## Check your API live
+5. **Follow Model**
+   ```python
+   class Follow(db.Model):
+       id: Mapped[int] = mapped_column(primary_key=True)
+       follower_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       followed_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       created_at: Mapped[datetime] = mapped_column(DateTime)
+   ```
 
-1. Once you run the `pipenv run start` command your API will start running live and you can open it by clicking in the "ports" tab and then clicking "open browser".
+## Generating the Database Diagram
 
-> ✋ If you are working on a coding cloud like [Codespaces](https://docs.github.com/en/codespaces/developing-in-codespaces/forwarding-ports-in-your-codespace#sharing-a-port) or [Gitpod](https://www.gitpod.io/docs/configure/workspaces/ports#configure-port-visibility) make sure that your forwared port is public.
+You can generate the database diagram in two ways:
 
-## Publish/Deploy your website!
+1. Using the pipenv command:
+   ```sh
+   pipenv run diagram
+   ```
 
-This boilerplate it's 100% read to deploy with Render.com and Herkou in a matter of minutes. Please read the [official documentation about it](https://start.4geeksacademy.com/deploy).
+2. Using Python directly:
+   ```sh
+   python src/models.py
+   ```
 
-### Contributors
+Both commands will generate a `diagram.txt` file in the root directory with the complete database schema.
 
-This template was built as part of the 4Geeks Academy [Coding Bootcamp](https://4geeksacademy.com/us/coding-bootcamp) by [Alejandro Sanchez](https://twitter.com/alesanchezr) and many other contributors. Find out more about our [Full Stack Developer Course](https://4geeksacademy.com/us/coding-bootcamps/part-time-full-stack-developer), and [Data Science Bootcamp](https://4geeksacademy.com/us/coding-bootcamps/datascience-machine-learning).
+## Development
 
-You can find other templates and resources like this at the [school github page](https://github.com/4geeksacademy/).
+This project demonstrates:
+- Database modeling with SQLAlchemy
+- Entity relationships and foreign keys
+- Database diagram generation
+- Flask integration with SQLAlchemy
+- Admin panel implementation
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+**Dante Fasano** - [GitHub](https://github.com/dantefasano)
+
+Project Link: [https://github.com/dantefasano/instagram-database-model](https://github.com/dantefasano/instagram-database-model)
+
+---
+
+Made with ❤️ by Dante Fasano

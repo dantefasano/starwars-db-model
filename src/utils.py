@@ -1,4 +1,6 @@
 from flask import jsonify, url_for
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class APIException(Exception):
     status_code = 400
@@ -39,3 +41,23 @@ def generate_sitemap(app):
         <p>Start working on your proyect by following the <a href="https://start.4geeksacademy.com/starters/flask" target="_blank">Quick Start</a></p>
         <p>Remember to specify a real endpoint path like: </p>
         <ul style="text-align: left;">"""+links_html+"</ul></div>"
+
+def hash_password(password):
+    """Genera un hash seguro de la contraseña."""
+    return generate_password_hash(password)
+
+def verify_password(hash, password):
+    """Verifica si la contraseña coincide con el hash."""
+    return check_password_hash(hash, password)
+
+def format_datetime(dt):
+    """Formatea una fecha y hora en formato ISO."""
+    if isinstance(dt, datetime):
+        return dt.isoformat()
+    return dt
+
+def validate_email(email):
+    """Valida el formato de un email."""
+    import re
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return bool(re.match(pattern, email))
