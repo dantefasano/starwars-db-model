@@ -1,5 +1,5 @@
 """
-Star Wars Blog API
+This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
 from flask import Flask, request, jsonify, url_for
@@ -14,7 +14,6 @@ from models import db, User
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 
-# Database configuration
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url.replace("postgres://", "postgresql://")
@@ -22,7 +21,6 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize extensions
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
@@ -40,9 +38,11 @@ def sitemap():
 
 @app.route('/user', methods=['GET'])
 def handle_hello():
+
     response_body = {
-        "msg": "Welcome to Star Wars Blog API"
+        "msg": "Hello, this is your GET /user response "
     }
+
     return jsonify(response_body), 200
 
 # this only runs if `$ python src/app.py` is executed

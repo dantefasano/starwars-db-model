@@ -1,13 +1,13 @@
-# Star Wars Blog Database Model
+# Instagram Database Model
 
-> A SQLAlchemy-based database model for a Star Wars blog application, featuring user management, character and planet information, and favorite system. This project demonstrates database modeling and relationships using SQLAlchemy.
+> A SQLAlchemy-based database model for an Instagram-like application, featuring user management, posts, comments, likes, and following relationships. This project demonstrates database modeling and relationships using SQLAlchemy.
 
 [![Flask](https://img.shields.io/badge/Flask-3.0.2-green.svg)](https://flask.palletsprojects.com/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-blue.svg)](https://www.sqlalchemy.org/)
 [![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Keywords:** Flask, SQLAlchemy, Database Modeling, Star Wars, Python, Backend Development
+**Keywords:** Flask, SQLAlchemy, Database Modeling, Instagram Clone, Python, Backend Development
 
 ## Table of Contents
 
@@ -23,17 +23,19 @@
 
 ## Features
 
-- Complete Star Wars blog database model
-- User management system
-- Character information storage
-- Planet information storage
-- Favorite system for characters and planets
+- Complete Instagram-like database model
+- User management with profiles
+- Post creation and management
+- Comment system
+- Like functionality
+- Following relationships
 - Automatic diagram generation
 - Clean and maintainable codebase
 
 ## Tech Stack
 
 - **Backend:**
+
   - Flask 3.0.2
   - SQLAlchemy 2.0+
   - Python 3.13+
@@ -84,7 +86,7 @@
 
 ## Database Models
 
-The project includes four main models that follow the format:
+The project includes five main models that follow the format:
 
 ```
 TableName
@@ -97,42 +99,53 @@ column_name data_type constraints
    ```python
    class User(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
+       username: Mapped[str] = mapped_column(String(80), unique=True)
        email: Mapped[str] = mapped_column(String(120), unique=True)
        password: Mapped[str] = mapped_column(nullable=False)
-       name: Mapped[str] = mapped_column(String(80))
+       profile_picture: Mapped[str] = mapped_column(String(255))
+       bio: Mapped[str] = mapped_column(Text)
        is_active: Mapped[bool] = mapped_column(Boolean())
        created_at: Mapped[datetime] = mapped_column(DateTime)
    ```
 
-2. **Character Model**
+2. **Post Model**
 
    ```python
-   class Character(db.Model):
-       id: Mapped[int] = mapped_column(primary_key=True)
-       name: Mapped[str] = mapped_column(String(100))
-       gender: Mapped[str] = mapped_column(String(20))
-       homeworld_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
-       description: Mapped[str] = mapped_column(Text)
-   ```
-
-3. **Planet Model**
-
-   ```python
-   class Planet(db.Model):
-       id: Mapped[int] = mapped_column(primary_key=True)
-       name: Mapped[str] = mapped_column(String(100))
-       climate: Mapped[str] = mapped_column(String(100))
-       terrain: Mapped[str] = mapped_column(String(100))
-       population: Mapped[str] = mapped_column(String(20))
-   ```
-
-4. **Favorite Model**
-   ```python
-   class Favorite(db.Model):
+   class Post(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
        user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-       character_id: Mapped[int] = mapped_column(ForeignKey("character.id"))
-       planet_id: Mapped[int] = mapped_column(ForeignKey("planet.id"))
+       image_url: Mapped[str] = mapped_column(String(255))
+       caption: Mapped[str] = mapped_column(Text)
+       created_at: Mapped[datetime] = mapped_column(DateTime)
+   ```
+
+3. **Comment Model**
+
+   ```python
+   class Comment(db.Model):
+       id: Mapped[int] = mapped_column(primary_key=True)
+       user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
+       content: Mapped[str] = mapped_column(Text)
+       created_at: Mapped[datetime] = mapped_column(DateTime)
+   ```
+
+4. **Like Model**
+
+   ```python
+   class Like(db.Model):
+       id: Mapped[int] = mapped_column(primary_key=True)
+       user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
+       created_at: Mapped[datetime] = mapped_column(DateTime)
+   ```
+
+5. **Follow Model**
+   ```python
+   class Follow(db.Model):
+       id: Mapped[int] = mapped_column(primary_key=True)
+       follower_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       followed_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
        created_at: Mapped[datetime] = mapped_column(DateTime)
    ```
 
@@ -171,7 +184,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Dante Fasano** - [GitHub](https://github.com/dantefasano)
 
-Project Link: [https://github.com/dantefasano/starwars-db-model](https://github.com/dantefasano/starwars-db-model)
+Project Link: [https://github.com/dantefasano/instagram-db-model](https://github.com/dantefasano/instagram-db-model)
 
 ---
 

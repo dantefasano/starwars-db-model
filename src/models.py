@@ -6,98 +6,115 @@ import os
 import sys
 from sqlalchemy import create_engine
 from sqlalchemy_schemadisplay import create_schema_graph
-import enum
 
 db = SQLAlchemy()
 
-class FavoriteType(enum.Enum):
-    CHARACTER = "character"
-    PLANET = "planet"
-
 class User(db.Model):
-    __tablename__ = 'users'
-    
     id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
-    name: Mapped[str] = mapped_column(String(80), nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
+    profile_picture: Mapped[str] = mapped_column(String(255), nullable=True)
+    bio: Mapped[str] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    favorites = relationship("Favorite", back_populates="user")
+    posts = relationship("Post", back_populates="user", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
+    likes = relationship("Like", back_populates="user", cascade="all, delete-orphan")
+    followers = relationship("Follow", foreign_keys="Follow.followed_id", back_populates="followed")
+    following = relationship("Follow", foreign_keys="Follow.follower_id", back_populates="follower")
 
     def serialize(self):
         return {
             "id": self.id,
+            "username": self.username,
             "email": self.email,
-            "name": self.name,
-            "created_at": self.created_at.isoformat()
+            "profile_picture": self.profile_picture,
+            "bio": self.bio,
+            "created_at": self.created_at.isoformat(),
+            # do not serialize the password, its a security breach
         }
 
-class Character(db.Model):
-    __tablename__ = 'characters'
-    
+class Post(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    gender: Mapped[str] = mapped_column(String(20))
-    homeworld_id: Mapped[int] = mapped_column(ForeignKey("planets.id"))
-    description: Mapped[str] = mapped_column(Text)
-    
-    # Relationships
-    homeworld = relationship("Planet", back_populates="residents")
-    favorites = relationship("Favorite", back_populates="character")
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "gender": self.gender,
-            "description": self.description
-        }
-
-class Planet(db.Model):
-    __tablename__ = 'planets'
-    
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    climate: Mapped[str] = mapped_column(String(100))
-    terrain: Mapped[str] = mapped_column(String(100))
-    population: Mapped[str] = mapped_column(String(20))
-    
-    # Relationships
-    residents = relationship("Character", back_populates="homeworld")
-    favorites = relationship("Favorite", back_populates="planet")
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "climate": self.climate,
-            "terrain": self.terrain,
-            "population": self.population
-        }
-
-class Favorite(db.Model):
-    __tablename__ = 'favorites'
-    
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    character_id: Mapped[int] = mapped_column(ForeignKey("characters.id"))
-    planet_id: Mapped[int] = mapped_column(ForeignKey("planets.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    image_url: Mapped[str] = mapped_column(String(255), nullable=False)
+    caption: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    user = relationship("User", back_populates="favorites")
-    character = relationship("Character", back_populates="favorites")
-    planet = relationship("Planet", back_populates="favorites")
+    user = relationship("User", back_populates="posts")
+    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
+    likes = relationship("Like", back_populates="post", cascade="all, delete-orphan")
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "character_id": self.character_id,
-            "planet_id": self.planet_id,
+            "image_url": self.image_url,
+            "caption": self.caption,
+            "created_at": self.created_at.isoformat(),
+            "user": self.user.serialize(),
+            "comments": [comment.serialize() for comment in self.comments],
+            "likes_count": len(self.likes)
+        }
+
+class Comment(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", back_populates="comments")
+    post = relationship("Post", back_populates="comments")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "post_id": self.post_id,
+            "content": self.content,
+            "created_at": self.created_at.isoformat(),
+            "user": self.user.serialize()
+        }
+
+class Like(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", back_populates="likes")
+    post = relationship("Post", back_populates="likes")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "post_id": self.post_id,
+            "created_at": self.created_at.isoformat()
+        }
+
+class Follow(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    follower_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    followed_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    follower = relationship("User", foreign_keys=[follower_id], back_populates="following")
+    followed = relationship("User", foreign_keys=[followed_id], back_populates="followers")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "follower_id": self.follower_id,
+            "followed_id": self.followed_id,
             "created_at": self.created_at.isoformat()
         }
 
@@ -113,34 +130,42 @@ def generate_diagram():
 User
 -
 id integer PK
+username string unique
 email string unique
 password string
-name string
+profile_picture string
+bio text
 is_active boolean
 created_at datetime
 
-Character
--
-id integer PK
-name string
-gender string
-homeworld_id integer FK >- Planet.id
-description text
-
-Planet
--
-id integer PK
-name string
-climate string
-terrain string
-population string
-
-Favorite
+Post
 -
 id integer PK
 user_id integer FK >- User.id
-character_id integer FK >- Character.id
-planet_id integer FK >- Planet.id
+image_url string
+caption text
+created_at datetime
+
+Comment
+-
+id integer PK
+user_id integer FK >- User.id
+post_id integer FK >- Post.id
+content text
+created_at datetime
+
+Like
+-
+id integer PK
+user_id integer FK >- User.id
+post_id integer FK >- Post.id
+created_at datetime
+
+Follow
+-
+id integer PK
+follower_id integer FK >- User.id
+followed_id integer FK >- User.id
 created_at datetime
 """
     
