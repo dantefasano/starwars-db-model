@@ -1,13 +1,13 @@
-# Instagram Database Model
+# Star Wars Blog Database Model
 
-> A SQLAlchemy-based database model for an Instagram-like application, featuring user management, posts, comments, likes, and following relationships. This project demonstrates database modeling and relationships using SQLAlchemy.
+> A SQLAlchemy-based database model for a Star Wars blog application, featuring user management, characters, planets, and favorites. This project demonstrates database modeling and relationships using SQLAlchemy.
 
 [![Flask](https://img.shields.io/badge/Flask-3.0.2-green.svg)](https://flask.palletsprojects.com/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-blue.svg)](https://www.sqlalchemy.org/)
 [![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Keywords:** Flask, SQLAlchemy, Database Modeling, Instagram Clone, Python, Backend Development
+**Keywords:** Flask, SQLAlchemy, Database Modeling, Star Wars, Python, Backend Development
 
 ## Table of Contents
 
@@ -23,19 +23,16 @@
 
 ## Features
 
-- Complete Instagram-like database model
-- User management with profiles
-- Post creation and management
-- Comment system
-- Like functionality
-- Following relationships
+- Star Wars themed database model
+- User management
+- Character and Planet information
+- Favorites system
 - Automatic diagram generation
 - Clean and maintainable codebase
 
 ## Tech Stack
 
 - **Backend:**
-
   - Flask 3.0.2
   - SQLAlchemy 2.0+
   - Python 3.13+
@@ -45,7 +42,6 @@
   - Graphviz for diagram generation
   - SQLite for database
   - Git for version control
-  - VS Code (recommended IDE)
 
 ## Project Structure
 
@@ -53,11 +49,9 @@
 /
 ├── src/
 │   ├── models.py        # Database models and diagram generation
-│   ├── main.py         # API endpoints
-│   ├── utils.py        # Utility functions
-│   └── admin.py        # Admin panel configuration
+│   ├── app.py          # API endpoints
+│   └── utils.py        # Utility functions
 ├── scripts/
-│   ├── init_db.py      # Database initialization
 │   └── generate_diagram.py # Diagram generation script
 ├── instance/
 │   └── database.db     # SQLite database file
@@ -68,113 +62,77 @@
 ## Setup & Installation
 
 1. Enter the virtual environment:
-
    ```sh
    pipenv shell
    ```
 
 2. Install dependencies:
-
    ```sh
    pipenv install
    ```
 
-3. Initialize the database:
-   ```sh
-   python scripts/init_db.py
-   ```
-
 ## Database Models
 
-The project includes five main models that follow the format:
-
-```
-TableName
--
-column_name data_type constraints
-```
+The project includes four main models:
 
 1. **User Model**
-
    ```python
    class User(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
-       username: Mapped[str] = mapped_column(String(80), unique=True)
        email: Mapped[str] = mapped_column(String(120), unique=True)
        password: Mapped[str] = mapped_column(nullable=False)
-       profile_picture: Mapped[str] = mapped_column(String(255))
-       bio: Mapped[str] = mapped_column(Text)
+       name: Mapped[str] = mapped_column(String(80))
        is_active: Mapped[bool] = mapped_column(Boolean())
        created_at: Mapped[datetime] = mapped_column(DateTime)
    ```
 
-2. **Post Model**
-
+2. **Character Model**
    ```python
-   class Post(db.Model):
+   class Character(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
-       user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-       image_url: Mapped[str] = mapped_column(String(255))
-       caption: Mapped[str] = mapped_column(Text)
-       created_at: Mapped[datetime] = mapped_column(DateTime)
+       name: Mapped[str] = mapped_column(String(100))
+       gender: Mapped[str] = mapped_column(String(20))
+       homeworld_id: Mapped[int] = mapped_column(ForeignKey("planets.id"))
+       description: Mapped[str] = mapped_column(Text)
    ```
 
-3. **Comment Model**
-
+3. **Planet Model**
    ```python
-   class Comment(db.Model):
+   class Planet(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
-       user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-       post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
-       content: Mapped[str] = mapped_column(Text)
-       created_at: Mapped[datetime] = mapped_column(DateTime)
+       name: Mapped[str] = mapped_column(String(100))
+       climate: Mapped[str] = mapped_column(String(100))
+       terrain: Mapped[str] = mapped_column(String(100))
+       population: Mapped[str] = mapped_column(String(20))
    ```
 
-4. **Like Model**
-
+4. **Favorite Model**
    ```python
-   class Like(db.Model):
+   class Favorite(db.Model):
        id: Mapped[int] = mapped_column(primary_key=True)
-       user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-       post_id: Mapped[int] = mapped_column(ForeignKey("post.id"))
-       created_at: Mapped[datetime] = mapped_column(DateTime)
-   ```
-
-5. **Follow Model**
-   ```python
-   class Follow(db.Model):
-       id: Mapped[int] = mapped_column(primary_key=True)
-       follower_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
-       followed_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
+       user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+       character_id: Mapped[int] = mapped_column(ForeignKey("characters.id"))
+       planet_id: Mapped[int] = mapped_column(ForeignKey("planets.id"))
        created_at: Mapped[datetime] = mapped_column(DateTime)
    ```
 
 ## Generating the Database Diagram
 
-You can generate the database diagram in two ways:
+You can generate the database diagram using:
 
-1. Using the pipenv command:
+```sh
+pipenv run diagram
+```
 
-   ```sh
-   pipenv run diagram
-   ```
-
-2. Using Python directly:
-   ```sh
-   python src/models.py
-   ```
-
-Both commands will generate a `diagram.txt` file in the root directory with the complete database schema.
+This will generate a `diagram.txt` file in the root directory with the complete database schema.
 
 ## Development
 
 This project demonstrates:
-
 - Database modeling with SQLAlchemy
 - Entity relationships and foreign keys
 - Database diagram generation
 - Flask integration with SQLAlchemy
-- Admin panel implementation
 
 ## License
 
@@ -184,7 +142,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Dante Fasano** - [GitHub](https://github.com/dantefasano)
 
-Project Link: [https://github.com/dantefasano/instagram-db-model](https://github.com/dantefasano/instagram-db-model)
+Project Link: [https://github.com/dantefasano/starwars-db-model](https://github.com/dantefasano/starwars-db-model)
 
 ---
 

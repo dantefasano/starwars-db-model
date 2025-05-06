@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from src.models import db, User, Post, Comment, Like, Follow
+from src.models import db, User, Character, Planet, Favorite
 
 app = Flask(__name__)
 CORS(app)
@@ -21,28 +21,45 @@ def get_user(user_id):
     user = User.query.get_or_404(user_id)
     return jsonify(user.serialize())
 
-# Endpoints para Posts
-@app.route('/posts', methods=['GET'])
-def get_posts():
-    posts = Post.query.all()
-    return jsonify([post.serialize() for post in posts])
+# Endpoints para Personajes
+@app.route('/characters', methods=['GET'])
+def get_characters():
+    characters = Character.query.all()
+    return jsonify([character.serialize() for character in characters])
 
-@app.route('/posts/<int:post_id>', methods=['GET'])
-def get_post(post_id):
-    post = Post.query.get_or_404(post_id)
-    return jsonify(post.serialize())
+@app.route('/characters/<int:character_id>', methods=['GET'])
+def get_character(character_id):
+    character = Character.query.get_or_404(character_id)
+    return jsonify(character.serialize())
 
-# Endpoints para Comentarios
-@app.route('/posts/<int:post_id>/comments', methods=['GET'])
-def get_post_comments(post_id):
-    comments = Comment.query.filter_by(post_id=post_id).all()
-    return jsonify([comment.serialize() for comment in comments])
+# Endpoints para Planetas
+@app.route('/planets', methods=['GET'])
+def get_planets():
+    planets = Planet.query.all()
+    return jsonify([planet.serialize() for planet in planets])
 
-# Endpoints para Likes
-@app.route('/posts/<int:post_id>/likes', methods=['GET'])
-def get_post_likes(post_id):
-    likes = Like.query.filter_by(post_id=post_id).all()
-    return jsonify([like.serialize() for like in likes])
+@app.route('/planets/<int:planet_id>', methods=['GET'])
+def get_planet(planet_id):
+    planet = Planet.query.get_or_404(planet_id)
+    return jsonify(planet.serialize())
+
+# Endpoints para Favoritos
+@app.route('/favorites', methods=['GET'])
+def get_favorites():
+    favorites = Favorite.query.all()
+    return jsonify([favorite.serialize() for favorite in favorites])
+
+@app.route('/favorites', methods=['POST'])
+def create_favorite():
+    data = request.get_json()
+    favorite = Favorite(
+        user_id=data['user_id'],
+        character_id=data.get('character_id'),
+        planet_id=data.get('planet_id')
+    )
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(favorite.serialize()), 201
 
 if __name__ == '__main__':
     app.run(debug=True) 
